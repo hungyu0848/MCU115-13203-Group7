@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">HW4</string>
+    <string name="btn_toast">預設 Toast</string>
+    <string name="btn_snackbar">按鈕式 SnackBar</string>
+    <string name="btn_dialog1">按鈕式 AlertDialog</string>
+    <string name="btn_dialog2">列表式 AlertDialog</string>
+    <string name="btn_dialog3">單選式 AlertDialog</string>
+</resources>
