@@ -1,8 +1,15 @@
 <resources>
     <string name="app_name">HW5</string>
-    <string name="btn_toast">預設 Toast</string>
-    <string name="btn_snackbar">按鈕式 SnackBar</string>
-    <string name="btn_dialog1">按鈕式 AlertDialog</string>
-    <string name="btn_dialog2">列表式 AlertDialog</string>
-    <string name="btn_dialog3">單選式 AlertDialog</string>
+    <string name="tab_start">Start</string>
+    <string name="tab_progress">Progress</string>
+    <string name="tab_result">Result</string>
+    <string name="btn_start">Start</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="status_idle">尚未開始</string>
+    <string name="status_preparing">準備中</string>
+    <string name="status_running">工作中</string>
+    <string name="status_running_percent">工作中 (%1$d%%)</string>
+    <string name="status_completed">背景工作結束</string>
+    <string name="status_cancelled">背景工作中斷</string>
+    <string name="status_cancelled_percent">背景工作中斷 (%1$d%%)</string>
 </resources>
