@@ -9,6 +9,7 @@
 - 外部地圖：各景點入口及沒有可用 App 的提示已接入；由外部 App 設定導航，非多點道路導航。URI 邏輯及測試已提交 `eb30a9b`；畫面串接仍是既有未提交檔案的一部分。
 - 獨立 QA：`app/build.gradle.kts` 新增 `.qa` build type，只有指定 `-PisolatedQa=true` 時 instrumentation 才指向 QA。Debug 與 QA 測試 APK 均已編譯；QA 尚待裝置驗證。
 - 本次整理持久協作規則及狀態入口；保留先前紀錄與所有既有程式變更。
+- 路線裝置測試前提已加強：只允許獨立 QA package、已存在的帳號資料庫及有效的 `qa_` 帳號 session；條件不符時略過，不能當作通過。此修改位於先前未追蹤的測試檔，尚待裝置執行。
 
 ## 3. 功能進度表
 
@@ -30,6 +31,7 @@
 
 - 2026-11-15：Wrapper CLI `--no-daemon --max-workers=1 :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest`：`BUILD SUCCESSFUL in 38s`，24 項單元測試本次執行、零 failures/errors/skipped；Debug APK 8,965,727 bytes。完整本機 JBR 與 Wrapper 指令見 AGENTS.md，需在參數後加入上述 task。
 - 2026-11-15：同一 Wrapper CLI、同樣資源參數，加 `-PisolatedQa=true :app:assembleQa :app:assembleQaAndroidTest`：`BUILD SUCCESSFUL in 34s`；這是編譯，不是裝置測試。
+- 2026-11-15：同一 Wrapper CLI、同樣資源參數，加 `-PisolatedQa=true :app:assembleQaAndroidTest`：`BUILD SUCCESSFUL in 35s`，4 tasks 執行；QA session 防護已編譯，未執行裝置測試。此階段只改裝置測試，不重跑不受影響的單元測試。
 - 先前 23 項通過是新增 ExternalMapTest 前的結果；較新的實際執行共 24 項。歷史會員／規劃裝置結果及中斷紀錄見歷史檔。
 - 路線、外部地圖按鈕、QA 隔離與最新測試 APK：**待裝置驗證**。未將使用者人工操作標為通過。
 
@@ -37,7 +39,7 @@
 
 - Pixel 8 曾顯示 ADB offline；不反覆啟動或修復，集中測試時再安全處理。不得清除、重設、覆蓋資料或登出現有帳號。
 - 規劃條件與勾選目前僅為 Activity 暫存，冷啟動或離開流程無法保證草稿保留。
-- QA 裝置測試須先確認裝置、套件及獨立 QA session；現有 RouteFlowTest 僅檢查正數 ID，不證明帳號有效。
+- QA 裝置測試須先確認裝置、套件及獨立 QA session；RouteFlowTest 已加入 QA package 與帳號查核，仍待裝置驗證；PlanningFlowTest 仍僅檢查正數 ID，不可把它視為帳號已驗證。
 - 個別與整趟估算使用直線距離假設；本機三筆景點並非線上搜尋。線上來源及政策前提見 [資料來源](PLANNING_DATA_SOURCES.md)。
 
 ## 6. 尚未提交的變更
@@ -46,7 +48,7 @@
 
 ## 7. 下一個優先開發功能
 
-依企畫書及現有流程評估可獨立開發的休息建議或行程儲存切片；先核對需求與資料保存邊界。選擇不依賴模擬器的工作，執行適當編譯及單元測試，裝置驗證延後且明確標示。
+依企畫書及現有流程評估可獨立開發的休息建議或行程儲存切片；先核對需求與資料保存邊界。選擇不依賴模擬器的工作，執行適當編譯及單元測試，裝置驗證延後且明確標示；集中測試前亦須處理 PlanningFlowTest 的 QA 前提。
 
 ## 8. 後續待辦事項
 
