@@ -11,6 +11,7 @@
 - 本次整理持久協作規則及狀態入口；保留先前紀錄與所有既有程式變更。
 - 路線與規劃裝置測試共用 QA 前提：只允許獨立 QA package、已存在的帳號資料庫及有效的 `qa_` 帳號 session；條件不符時略過，不能當作通過。修改位於先前未追蹤的測試檔及新測試輔助檔，尚待裝置執行。
 - 目的地天氣的 WMO 代碼辨識元件已實作，未知代碼保持 UNKNOWN；建構及單元測試通過。尚未連接 API、中文畫面、氣溫或降雨機率，整體天氣功能仍開發中。
+- 天氣查詢與行程畫面已實作：使用者主動查詢各景點，顯示查詢時最近整點預報、地點時區、氣溫、天氣及前一小時降雨機率；缺值、失敗、取消、有限快取與重試均有處理。行程尚無出發／抵達時間，不能推稱抵達時預報。來源與授權連結已標示；裝置及實際 UI 驗證仍待完成。
 
 ## 3. 功能進度表
 
@@ -23,7 +24,7 @@
 | C 出遊條件 | 部分已實作、建構與單元測試通過；先前部分裝置案例分批通過 | 任意出發地搜尋、整體驗收 |
 | D 景點 | 本機推薦、搜尋及勾選已實作，建構／單元通過；舊畫面案例分批通過 | 線上搜尋及完整驗收 |
 | E 路線與地圖 | 排序、估算、按需 OSM 底圖已實作；建構／相關單元測試通過 | 路線裝置驗證、休息建議；不代表道路導航 |
-| F 行程詳情與外部地圖 | 單點外部地圖入口已實作、建構／URI 單元測試通過；WMO 代碼元件已實作並通過單元測試 | 裝置跳轉、天氣查詢與顯示、休息點、行程詳情及儲存 |
+| F 行程詳情與外部地圖 | 單點外部地圖與天氣查詢畫面已實作、建構及單元測試通過 | 外部地圖與天氣裝置驗證、抵達時間預報、休息點、行程詳情及儲存 |
 | G 我的行程 | 尚未開始 | Room 保存、查看與刪除 |
 | H 個人中心 | 開發中；首頁已有帳號顯示及登出 | 其他企畫書項目 |
 | 課程元件 | 尚未開始 | 依實際功能接入並驗證 |
@@ -35,6 +36,9 @@
 - 2026-11-15：同一 Wrapper CLI、同樣資源參數，加 `-PisolatedQa=true :app:assembleQaAndroidTest`：`BUILD SUCCESSFUL in 35s`，4 tasks 執行；QA session 防護已編譯，未執行裝置測試。此階段只改裝置測試，不重跑不受影響的單元測試。
 - 2026-11-15：相同 `:app:assembleQaAndroidTest` 再執行以驗證共用 QA 前提，`BUILD SUCCESSFUL in 41s`，4 tasks 執行；僅編譯，裝置測試仍待執行。
 - 2026-11-15：Wrapper CLI 同上，使用 `--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest`：`BUILD SUCCESSFUL in 52s`，26 項單元測試、0 failures/errors/skipped；Debug APK 8,965,727 bytes，22:13:56。第一次未引用含點號的 PowerShell 參數，Gradle 誤認為 task、未進編譯；修正引號後通過。
+- 2026-11-15：相同資源參數執行 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 2m 6s`，41 tasks 執行；29 項單元測試、零 failures/errors/skipped，Debug APK 7,713,555 bytes（22:24:04）。天氣資料層含解析測試；網路與 UI 尚未驗證。
+- 2026-11-15：同一 Wrapper CLI 使用 `--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest`，`BUILD SUCCESSFUL in 1m 19s`，71 tasks 執行；30 項單元測試零 failures/errors/skipped，測試 APK 僅編譯。之後加入來源及授權連結，以相同資源參數執行 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 16s`；單元測試 up-to-date，Debug APK 9,105,991 bytes（22:32:24）。
+- 使用公開淺水灣景點座標向 Open-Meteo 執行一次 HTTPS 查詢，回傳 Asia/Taipei 和各 48 筆逐時欄位；這是服務回應檢查，不等於 Android 裝置網路驗證。服務免費方案限非商業用途與流量額度，見 [使用條款](https://open-meteo.com/en/terms)及[授權](https://open-meteo.com/en/licence)。
 - 先前 23 項通過是新增 ExternalMapTest 前的結果；較新的實際執行共 24 項。歷史會員／規劃裝置結果及中斷紀錄見歷史檔。
 - 路線、外部地圖按鈕、QA 隔離與最新測試 APK：**待裝置驗證**。未將使用者人工操作標為通過。
 
@@ -43,6 +47,8 @@
 - Pixel 8 曾顯示 ADB offline；不反覆啟動或修復，集中測試時再安全處理。不得清除、重設、覆蓋資料或登出現有帳號。
 - 規劃條件與勾選目前僅為 Activity 暫存，冷啟動或離開流程無法保證草稿保留。
 - QA 裝置測試須先確認裝置、套件及獨立 QA session；RouteFlowTest 和 PlanningFlowTest 已共用 QA package 與帳號查核，但該防護尚待裝置驗證。
+- 天氣流程及 UI 尚待裝置驗證，包括無網路、部分資料、取消／重建、授權連結與重試；單機間隔及短暫快取不能保證跨裝置遵守服務流量上限。現行預報不是抵達時間預報。
+- 天氣功能依賴 Gson。因依賴設定與先前使用者未提交的 Gradle 修改混在同一檔，嘗試僅暫存本次依賴補丁三次未成功；未強制加入歷史修改，天氣相關程式與設定保留未提交，待安全分離後提交。
 - 個別與整趟估算使用直線距離假設；本機三筆景點並非線上搜尋。線上來源及政策前提見 [資料來源](PLANNING_DATA_SOURCES.md)。
 
 ## 6. 尚未提交的變更
@@ -51,7 +57,7 @@
 
 ## 7. 下一個優先開發功能
 
-繼續目的地天氣功能：依 [Open-Meteo 文件](https://open-meteo.com/en/docs) 設計含時區及時間標示的溫度、天氣代碼與降雨機率查詢，處理空值／網路失敗及服務限制；不把逐小時降雨機率誤稱即時觀測。其後完成行程畫面及集中裝置驗證；休息建議與行程儲存仍待完成。
+安全分離天氣相關依賴與既有未提交 Gradle 修改，完成範圍明確的提交；之後依企畫書繼續不依賴裝置的休息建議或行程儲存工作。集中裝置驗證天氣及路線時不得清除或覆蓋資料；抵達時間預報需先有可信的行程時間模型。
 
 ## 8. 後續待辦事項
 
