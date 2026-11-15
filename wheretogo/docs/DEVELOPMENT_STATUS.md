@@ -18,6 +18,7 @@
 - 天氣預報時間選取已加上 30 分鐘最大距離檢查；當逐時資料有缺口或超出相鄰時間範圍時回報不可用，不以相距過遠的預報冒充目標時段。建構及單元測試通過；裝置驗證仍待集中執行。
 - 行程保存第一階段：已實作保存快照與帳號範圍操作介面，沿用現有條件及景點模型，保留景點順序、名稱／座標／地址與估算說明；記憶體替身測試跨帳號讀取／刪除、輸入驗證及快照獨立性。尚未接 Room、session 或 UI，沒有實際持久化。
 - 使用者已選擇沿用 `accounts.db` 並提供非破壞性 migration。已完成版本化行程快照編解碼，拒絕未知版本、未知欄位及損壞資料，並測試資料往返；**尚未實作或啟用資料庫 migration**，會員資料與備份設定均未變更。
+- 已準備新增行程表及帳號限定查詢的 SQL；使用既有 v1 會員 schema 在主機記憶體 SQLite 測試，涵蓋會員保留、跨帳號存取／刪除、外鍵限制、表格衝突及交易失敗回滾。這不是 Android Room migration 驗證，SQL 尚未接入正式資料庫；有行程的帳號會被外鍵限制刪除，避免隱性連帶刪除行程。
 
 ## 3. 功能進度表
 
@@ -49,6 +50,7 @@
 - 2026-11-15：相同 Wrapper CLI 資源參數及 `:app:assembleDebug :app:testDebugUnitTest` 驗證預報時間缺口邊界，`BUILD SUCCESSFUL in 37s`，9 tasks 執行；37 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:51:00）。未執行裝置測試。
 - 2026-11-15：相同 Wrapper CLI、`--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 38s`，9 tasks 執行；41 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:58:34）。行程保存使用記憶體替身測試，Room 與裝置未驗證。
 - 2026-11-15：相同 Wrapper CLI 資源參數及 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 38s`，9 tasks 執行；43 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（23:05:24）。涵蓋快照順序與估算說明往返、未知版本／欄位及損壞資料；未執行裝置測試。
+- 2026-11-15：`py -V:Astral/CPython3.14.6 docs/Verify-SavedTripSql.py` 在主機記憶體 SQLite 3.53.1 執行 4 項測試通過；相同 Wrapper CLI 資源參數及 `:app:assembleDebug :app:testDebugUnitTest` 顯示 `BUILD SUCCESSFUL in 39s`，43 項單元測試零失敗／略過，Debug APK 9,105,991 bytes（23:08:42）。尚未進行 Android SQLite／Room 或裝置測試。
 - 使用公開淺水灣景點座標向 Open-Meteo 執行一次 HTTPS 查詢，回傳 Asia/Taipei 和各 48 筆逐時欄位；這是服務回應檢查，不等於 Android 裝置網路驗證。服務免費方案限非商業用途與流量額度，見 [使用條款](https://open-meteo.com/en/terms)及[授權](https://open-meteo.com/en/licence)。
 - 先前 23 項通過是新增 ExternalMapTest 前的結果；較新的實際執行共 24 項。歷史會員／規劃裝置結果及中斷紀錄見歷史檔。
 - 路線、外部地圖按鈕、QA 隔離與最新測試 APK：**待裝置驗證**。未將使用者人工操作標為通過。
