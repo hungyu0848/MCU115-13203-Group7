@@ -15,6 +15,7 @@
 - 天氣資料層、單元測試及 Gson 依賴以獨立 index 精確建立本機 commit `e71d69f`；提交前檢查四個檔案的 staged diff，提交後確認正式 index 無暫存，並比對既有 Gradle、規劃、路線與天氣畫面共八個檔案雜湊不變。未 push。
 - 新增獨立抵達時間計算元件：在明確提供出發 epoch 及每段交通／停留分鐘數時，計算各站抵達時間，拒絕負數及運算溢位；已建構與單元測試通過。尚未接入既有行程、出發時間輸入或天氣 UI，不代表抵達時間預報已完成。
 - 時間輸入來源與完整性模型已實作：使用者出發時間須含明確時區；各段交通及停留必須標示使用者輸入、外部服務估算或具說明的系統預設。缺項明確回報，不填補預設；完整時沿用既有時間計算並保留來源，溢位明確回報。僅供程式模型使用，未顯示預測抵達時間。
+- 天氣預報時間選取已加上 30 分鐘最大距離檢查；當逐時資料有缺口或超出相鄰時間範圍時回報不可用，不以相距過遠的預報冒充目標時段。建構及單元測試通過；裝置驗證仍待集中執行。
 
 ## 3. 功能進度表
 
@@ -43,6 +44,7 @@
 - 2026-11-15：同一 Wrapper CLI 使用 `--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest`，`BUILD SUCCESSFUL in 1m 19s`，71 tasks 執行；30 項單元測試零 failures/errors/skipped，測試 APK 僅編譯。之後加入來源及授權連結，以相同資源參數執行 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 16s`；單元測試 up-to-date，Debug APK 9,105,991 bytes（22:32:24）。
 - 2026-11-15：相同 Wrapper CLI 資源參數執行 `:app:assembleDebug :app:testDebugUnitTest` 驗證抵達時間元件與邊界修正，`BUILD SUCCESSFUL in 36s`，9 tasks 執行；33 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:41:28）。這是純計算元件，尚未執行裝置測試。
 - 2026-11-15：相同 Wrapper CLI、`--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 39s`，9 tasks 執行；36 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:48:30）。來源與缺值模型為純計算程式，未執行裝置測試。
+- 2026-11-15：相同 Wrapper CLI 資源參數及 `:app:assembleDebug :app:testDebugUnitTest` 驗證預報時間缺口邊界，`BUILD SUCCESSFUL in 37s`，9 tasks 執行；37 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:51:00）。未執行裝置測試。
 - 使用公開淺水灣景點座標向 Open-Meteo 執行一次 HTTPS 查詢，回傳 Asia/Taipei 和各 48 筆逐時欄位；這是服務回應檢查，不等於 Android 裝置網路驗證。服務免費方案限非商業用途與流量額度，見 [使用條款](https://open-meteo.com/en/terms)及[授權](https://open-meteo.com/en/licence)。
 - 先前 23 項通過是新增 ExternalMapTest 前的結果；較新的實際執行共 24 項。歷史會員／規劃裝置結果及中斷紀錄見歷史檔。
 - 路線、外部地圖按鈕、QA 隔離與最新測試 APK：**待裝置驗證**。未將使用者人工操作標為通過。

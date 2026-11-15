@@ -40,6 +40,8 @@ object WeatherForecast {
             require(epochs.zipWithNext().all { (a, b) -> a < b })
             require(targetEpochSeconds >= epochs.first() && targetEpochSeconds <= epochs.last() + 3599)
             val index = epochs.indices.minBy { abs(epochs[it] - targetEpochSeconds) }
+            // A gap or the end of the forecast must not silently substitute a distant hour.
+            require(abs(epochs[index] - targetEpochSeconds) <= 1800)
             val temp = temperatures?.get(index)?.takeUnless { it.isJsonNull }?.asDouble
             val probability = probabilities?.get(index)?.takeUnless { it.isJsonNull }?.asBigDecimal?.intValueExact()
             val code = codes?.get(index)?.takeUnless { it.isJsonNull }?.asBigDecimal?.intValueExact()

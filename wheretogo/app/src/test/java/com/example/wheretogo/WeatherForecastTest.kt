@@ -34,6 +34,15 @@ class WeatherForecastTest {
         assertEquals(WeatherCondition.UNKNOWN, weather.condition)
     }
 
+    @Test fun distantHoursAreNotPresentedAsTheRequestedForecast() {
+        val gap = """{"timezone":"Asia/Taipei","hourly":{"time":[3600,14400]}}"""
+        assertEquals(3600L, WeatherForecast.parseNearest(gap, 5400).timeEpochSeconds)
+        assertThrows(IOException::class.java) { WeatherForecast.parseNearest(gap, 5401) }
+        assertThrows(IOException::class.java) { WeatherForecast.parseNearest(gap, 9000) }
+        assertEquals(10800L, WeatherForecast.parseNearest(json, 12600).timeEpochSeconds)
+        assertThrows(IOException::class.java) { WeatherForecast.parseNearest(json, 12601) }
+    }
+
     @Test fun urlUsesCoordinatesAndDoesNotDependOnLocale() {
         val prior = java.util.Locale.getDefault()
         try {
