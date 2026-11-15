@@ -10,6 +10,7 @@
 - 獨立 QA：`app/build.gradle.kts` 新增 `.qa` build type，只有指定 `-PisolatedQa=true` 時 instrumentation 才指向 QA。Debug 與 QA 測試 APK 均已編譯；QA 尚待裝置驗證。
 - 本次整理持久協作規則及狀態入口；保留先前紀錄與所有既有程式變更。
 - 路線與規劃裝置測試共用 QA 前提：只允許獨立 QA package、已存在的帳號資料庫及有效的 `qa_` 帳號 session；條件不符時略過，不能當作通過。修改位於先前未追蹤的測試檔及新測試輔助檔，尚待裝置執行。
+- 目的地天氣的 WMO 代碼辨識元件已實作，未知代碼保持 UNKNOWN；建構及單元測試通過。尚未連接 API、中文畫面、氣溫或降雨機率，整體天氣功能仍開發中。
 
 ## 3. 功能進度表
 
@@ -22,7 +23,7 @@
 | C 出遊條件 | 部分已實作、建構與單元測試通過；先前部分裝置案例分批通過 | 任意出發地搜尋、整體驗收 |
 | D 景點 | 本機推薦、搜尋及勾選已實作，建構／單元通過；舊畫面案例分批通過 | 線上搜尋及完整驗收 |
 | E 路線與地圖 | 排序、估算、按需 OSM 底圖已實作；建構／相關單元測試通過 | 路線裝置驗證、休息建議；不代表道路導航 |
-| F 行程詳情與外部地圖 | 單點外部地圖入口已實作、建構／URI 單元測試通過 | 裝置跳轉、天氣、休息點、行程詳情及儲存 |
+| F 行程詳情與外部地圖 | 單點外部地圖入口已實作、建構／URI 單元測試通過；WMO 代碼元件已實作並通過單元測試 | 裝置跳轉、天氣查詢與顯示、休息點、行程詳情及儲存 |
 | G 我的行程 | 尚未開始 | Room 保存、查看與刪除 |
 | H 個人中心 | 開發中；首頁已有帳號顯示及登出 | 其他企畫書項目 |
 | 課程元件 | 尚未開始 | 依實際功能接入並驗證 |
@@ -33,6 +34,7 @@
 - 2026-11-15：同一 Wrapper CLI、同樣資源參數，加 `-PisolatedQa=true :app:assembleQa :app:assembleQaAndroidTest`：`BUILD SUCCESSFUL in 34s`；這是編譯，不是裝置測試。
 - 2026-11-15：同一 Wrapper CLI、同樣資源參數，加 `-PisolatedQa=true :app:assembleQaAndroidTest`：`BUILD SUCCESSFUL in 35s`，4 tasks 執行；QA session 防護已編譯，未執行裝置測試。此階段只改裝置測試，不重跑不受影響的單元測試。
 - 2026-11-15：相同 `:app:assembleQaAndroidTest` 再執行以驗證共用 QA 前提，`BUILD SUCCESSFUL in 41s`，4 tasks 執行；僅編譯，裝置測試仍待執行。
+- 2026-11-15：Wrapper CLI 同上，使用 `--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest`：`BUILD SUCCESSFUL in 52s`，26 項單元測試、0 failures/errors/skipped；Debug APK 8,965,727 bytes，22:13:56。第一次未引用含點號的 PowerShell 參數，Gradle 誤認為 task、未進編譯；修正引號後通過。
 - 先前 23 項通過是新增 ExternalMapTest 前的結果；較新的實際執行共 24 項。歷史會員／規劃裝置結果及中斷紀錄見歷史檔。
 - 路線、外部地圖按鈕、QA 隔離與最新測試 APK：**待裝置驗證**。未將使用者人工操作標為通過。
 
@@ -49,7 +51,7 @@
 
 ## 7. 下一個優先開發功能
 
-依企畫書及現有流程評估可獨立開發的休息建議或行程儲存切片；先核對需求與資料保存邊界。選擇不依賴模擬器的工作，執行適當編譯及單元測試，裝置驗證延後且明確標示。
+繼續目的地天氣功能：依 [Open-Meteo 文件](https://open-meteo.com/en/docs) 設計含時區及時間標示的溫度、天氣代碼與降雨機率查詢，處理空值／網路失敗及服務限制；不把逐小時降雨機率誤稱即時觀測。其後完成行程畫面及集中裝置驗證；休息建議與行程儲存仍待完成。
 
 ## 8. 後續待辦事項
 
