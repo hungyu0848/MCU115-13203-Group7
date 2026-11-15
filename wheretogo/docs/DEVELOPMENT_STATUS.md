@@ -14,6 +14,7 @@
 - 天氣查詢與行程畫面已實作：使用者主動查詢各景點，顯示查詢時最近整點預報、地點時區、氣溫、天氣及前一小時降雨機率；缺值、失敗、取消、有限快取與重試均有處理。行程尚無出發／抵達時間，不能推稱抵達時預報。來源與授權連結已標示；裝置及實際 UI 驗證仍待完成。
 - 天氣資料層、單元測試及 Gson 依賴以獨立 index 精確建立本機 commit `e71d69f`；提交前檢查四個檔案的 staged diff，提交後確認正式 index 無暫存，並比對既有 Gradle、規劃、路線與天氣畫面共八個檔案雜湊不變。未 push。
 - 新增獨立抵達時間計算元件：在明確提供出發 epoch 及每段交通／停留分鐘數時，計算各站抵達時間，拒絕負數及運算溢位；已建構與單元測試通過。尚未接入既有行程、出發時間輸入或天氣 UI，不代表抵達時間預報已完成。
+- 時間輸入來源與完整性模型已實作：使用者出發時間須含明確時區；各段交通及停留必須標示使用者輸入、外部服務估算或具說明的系統預設。缺項明確回報，不填補預設；完整時沿用既有時間計算並保留來源，溢位明確回報。僅供程式模型使用，未顯示預測抵達時間。
 
 ## 3. 功能進度表
 
@@ -41,6 +42,7 @@
 - 2026-11-15：相同資源參數執行 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 2m 6s`，41 tasks 執行；29 項單元測試、零 failures/errors/skipped，Debug APK 7,713,555 bytes（22:24:04）。天氣資料層含解析測試；網路與 UI 尚未驗證。
 - 2026-11-15：同一 Wrapper CLI 使用 `--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest`，`BUILD SUCCESSFUL in 1m 19s`，71 tasks 執行；30 項單元測試零 failures/errors/skipped，測試 APK 僅編譯。之後加入來源及授權連結，以相同資源參數執行 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 16s`；單元測試 up-to-date，Debug APK 9,105,991 bytes（22:32:24）。
 - 2026-11-15：相同 Wrapper CLI 資源參數執行 `:app:assembleDebug :app:testDebugUnitTest` 驗證抵達時間元件與邊界修正，`BUILD SUCCESSFUL in 36s`，9 tasks 執行；33 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:41:28）。這是純計算元件，尚未執行裝置測試。
+- 2026-11-15：相同 Wrapper CLI、`--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 39s`，9 tasks 執行；36 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:48:30）。來源與缺值模型為純計算程式，未執行裝置測試。
 - 使用公開淺水灣景點座標向 Open-Meteo 執行一次 HTTPS 查詢，回傳 Asia/Taipei 和各 48 筆逐時欄位；這是服務回應檢查，不等於 Android 裝置網路驗證。服務免費方案限非商業用途與流量額度，見 [使用條款](https://open-meteo.com/en/terms)及[授權](https://open-meteo.com/en/licence)。
 - 先前 23 項通過是新增 ExternalMapTest 前的結果；較新的實際執行共 24 項。歷史會員／規劃裝置結果及中斷紀錄見歷史檔。
 - 路線、外部地圖按鈕、QA 隔離與最新測試 APK：**待裝置驗證**。未將使用者人工操作標為通過。
@@ -53,6 +55,8 @@
 - 天氣流程及 UI 尚待裝置驗證，包括無網路、部分資料、取消／重建、授權連結與重試；單機間隔及短暫快取不能保證跨裝置遵守服務流量上限。現行預報不是抵達時間預報。
 - 天氣資料層的 Gson 依賴已使用獨立 index 安全提交；天氣畫面控制器與資源依賴先前未提交的規劃、路線畫面，仍保留未提交，避免混入歷史工作。
 - 個別與整趟估算使用直線距離假設；本機三筆景點並非線上搜尋。線上來源及政策前提見 [資料來源](PLANNING_DATA_SOURCES.md)。
+- 抵達時間資料不足：目前沒有使用者出發日期／時刻，交通只有「直線距離 × 1.5、25 km/h」的整趟粗略估算，三個景點的 60 分鐘停留是系統預設，並非使用者輸入或道路服務結果。現階段不可把它們宣稱為可靠抵達時間。
+- 待後續產品決策：可由使用者逐段輸入（控制度高但操作較多）、使用清楚標示的現有粗略估算及預設（容易使用但誤差可能大），或接入符合零付費及使用條件的道路服務（可能受額度、可用性及機車路線支援限制）。需確認選擇與 UI 呈現後才接入抵達時間預報；此階段不擅自選用。
 
 ## 6. 尚未提交的變更
 
@@ -60,7 +64,7 @@
 
 ## 7. 下一個優先開發功能
 
-依企畫書繼續不依賴裝置且不衝突既有修改的休息建議或行程儲存切片；確認來源及資料保存邊界。若接入抵達時間，先讓使用者指定出發時間並依既有路線估算提供逐段交通時間，不得假設目前時刻即為出發；仍須確認 UI 與天氣整合。集中裝置驗證天氣及路線時不得清除或覆蓋資料。
+持續處理不依賴模擬器的行程資料與時間模型；抵達時間接入前須決定時間來源及標示方式，讓使用者指定出發時刻，不能假設現在就是出發。休息建議須有可核實來源；行程儲存須保護現有帳號資料。集中裝置驗證天氣及路線時不得清除或覆蓋資料。
 
 ## 8. 後續待辦事項
 
