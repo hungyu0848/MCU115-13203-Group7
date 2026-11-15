@@ -13,6 +13,7 @@
 - 目的地天氣的 WMO 代碼辨識元件已實作，未知代碼保持 UNKNOWN；建構及單元測試通過。尚未連接 API、中文畫面、氣溫或降雨機率，整體天氣功能仍開發中。
 - 天氣查詢與行程畫面已實作：使用者主動查詢各景點，顯示查詢時最近整點預報、地點時區、氣溫、天氣及前一小時降雨機率；缺值、失敗、取消、有限快取與重試均有處理。行程尚無出發／抵達時間，不能推稱抵達時預報。來源與授權連結已標示；裝置及實際 UI 驗證仍待完成。
 - 天氣資料層、單元測試及 Gson 依賴以獨立 index 精確建立本機 commit `e71d69f`；提交前檢查四個檔案的 staged diff，提交後確認正式 index 無暫存，並比對既有 Gradle、規劃、路線與天氣畫面共八個檔案雜湊不變。未 push。
+- 新增獨立抵達時間計算元件：在明確提供出發 epoch 及每段交通／停留分鐘數時，計算各站抵達時間，拒絕負數及運算溢位；已建構與單元測試通過。尚未接入既有行程、出發時間輸入或天氣 UI，不代表抵達時間預報已完成。
 
 ## 3. 功能進度表
 
@@ -39,6 +40,7 @@
 - 2026-11-15：Wrapper CLI 同上，使用 `--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest`：`BUILD SUCCESSFUL in 52s`，26 項單元測試、0 failures/errors/skipped；Debug APK 8,965,727 bytes，22:13:56。第一次未引用含點號的 PowerShell 參數，Gradle 誤認為 task、未進編譯；修正引號後通過。
 - 2026-11-15：相同資源參數執行 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 2m 6s`，41 tasks 執行；29 項單元測試、零 failures/errors/skipped，Debug APK 7,713,555 bytes（22:24:04）。天氣資料層含解析測試；網路與 UI 尚未驗證。
 - 2026-11-15：同一 Wrapper CLI 使用 `--no-daemon --max-workers=1 '-Pkotlin.compiler.execution.strategy=in-process' :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest`，`BUILD SUCCESSFUL in 1m 19s`，71 tasks 執行；30 項單元測試零 failures/errors/skipped，測試 APK 僅編譯。之後加入來源及授權連結，以相同資源參數執行 `:app:assembleDebug :app:testDebugUnitTest`，`BUILD SUCCESSFUL in 16s`；單元測試 up-to-date，Debug APK 9,105,991 bytes（22:32:24）。
+- 2026-11-15：相同 Wrapper CLI 資源參數執行 `:app:assembleDebug :app:testDebugUnitTest` 驗證抵達時間元件與邊界修正，`BUILD SUCCESSFUL in 36s`，9 tasks 執行；33 項單元測試、零 failures/errors/skipped，Debug APK 9,105,991 bytes（22:41:28）。這是純計算元件，尚未執行裝置測試。
 - 使用公開淺水灣景點座標向 Open-Meteo 執行一次 HTTPS 查詢，回傳 Asia/Taipei 和各 48 筆逐時欄位；這是服務回應檢查，不等於 Android 裝置網路驗證。服務免費方案限非商業用途與流量額度，見 [使用條款](https://open-meteo.com/en/terms)及[授權](https://open-meteo.com/en/licence)。
 - 先前 23 項通過是新增 ExternalMapTest 前的結果；較新的實際執行共 24 項。歷史會員／規劃裝置結果及中斷紀錄見歷史檔。
 - 路線、外部地圖按鈕、QA 隔離與最新測試 APK：**待裝置驗證**。未將使用者人工操作標為通過。
@@ -58,7 +60,7 @@
 
 ## 7. 下一個優先開發功能
 
-依企畫書繼續不依賴裝置且不衝突既有修改的休息建議或行程儲存切片；確認來源及資料保存邊界。集中裝置驗證天氣及路線時不得清除或覆蓋資料；抵達時間預報需先有可信的行程時間模型。
+依企畫書繼續不依賴裝置且不衝突既有修改的休息建議或行程儲存切片；確認來源及資料保存邊界。若接入抵達時間，先讓使用者指定出發時間並依既有路線估算提供逐段交通時間，不得假設目前時刻即為出發；仍須確認 UI 與天氣整合。集中裝置驗證天氣及路線時不得清除或覆蓋資料。
 
 ## 8. 後續待辦事項
 
