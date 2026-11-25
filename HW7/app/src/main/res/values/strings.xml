@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">HW7 Pomodoro Timer</string>
+    <string name="title_main">Smart Pomodoro Focus Timer</string>
+    <string name="default_timer">25:00</string>
+    <string name="status_ready">Ready to Focus</string>
+    <string name="status_focusing">Focusing...</string>
+    <string name="btn_start_focus">Start Focus</string>
+    <string name="btn_stop">Stop</string>
+
+    <string name="title_finish">Focus Session Complete!</string>
+    <string name="finish_timer">00:00</string>
+    <string name="btn_back_to_home">Back to Home</string>
+    <string name="debug_mode_label">Debug 30s Mode</string>
+
+    <string name="notification_channel_name">Pomodoro Focus Timer</string>
+    <string name="notification_channel_desc">Notifications for Pomodoro focus timer countdown</string>
+    <string name="notification_boot_title">智慧番茄鐘專注提醒</string>
+    <string name="notification_boot_content">新的一天開始囉！點擊開始今天的專注學習！</string>
+</resources>
